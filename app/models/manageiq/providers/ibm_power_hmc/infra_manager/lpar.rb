@@ -5,6 +5,10 @@ class ManageIQ::Providers::IbmPowerHmc::InfraManager::Lpar < ManageIQ::Providers
 
   supports :reconfigure_network_adapters
 
+  supports :reconfigure_vcpus do
+    _("Virtual processors can only be reconfigured on shared processor partitions") if processor_share_type == "dedicated"
+  end
+
   supports :terminate do
     if power_state == "off"
       unsupported_reason(:control)
