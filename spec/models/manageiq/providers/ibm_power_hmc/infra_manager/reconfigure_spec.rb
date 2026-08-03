@@ -81,7 +81,7 @@ describe ManageIQ::Providers::IbmPowerHmc::InfraManager::Lpar do
     end
   end
 
- describe "#max_cpu_cores_per_socket" do
+  describe "#max_cpu_cores_per_socket" do
     it "always returns 1" do
       expect(vm.max_cpu_cores_per_socket).to eq(1)
       expect(vm.max_cpu_cores_per_socket(8)).to eq(1)
