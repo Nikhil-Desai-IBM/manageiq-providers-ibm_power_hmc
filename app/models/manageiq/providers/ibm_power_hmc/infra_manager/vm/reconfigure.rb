@@ -96,9 +96,9 @@ module ManageIQ::Providers::IbmPowerHmc::InfraManager::Vm::Reconfigure
     end
   end
 
-  # NEW: independent "Virtual Processor" field, only meaningful for shared-processor partitions.
-  # Populated from a separate options key (:number_of_vcpus) so it never collides with the
-  # existing :number_of_cpus / "Processor" field above.
+  # Builds the virtual processor reconfigure spec for shared partitions.
+  # Uses :number_of_vcpus separately from :number_of_cpus, which is handled by
+  # build_proc_config_spec for processor count or processing units.
   def build_vproc_config_spec(lpar, spec, options)
     raise MiqException::MiqVmError, "Virtual processors can only be changed on shared processor partitions" if lpar.dedicated == "true"
 
