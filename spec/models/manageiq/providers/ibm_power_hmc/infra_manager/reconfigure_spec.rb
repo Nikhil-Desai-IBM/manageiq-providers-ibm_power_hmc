@@ -29,9 +29,6 @@ describe ManageIQ::Providers::IbmPowerHmc::InfraManager::Lpar do
     allow(lpar).to receive(:rmc_state).and_return("inactive")
   end
 
-  # -----------------------------------------------------------------------
-  # reconfigurable?
-  # -----------------------------------------------------------------------
   describe "#reconfigurable?" do
     it "returns true when host is HMC-managed" do
       host.advanced_settings.create!(:name => "hmc_managed", :value => "true")
@@ -48,9 +45,6 @@ describe ManageIQ::Providers::IbmPowerHmc::InfraManager::Lpar do
     end
   end
 
-  # -----------------------------------------------------------------------
-  # max_total_vcpus / max_vcpus
-  # -----------------------------------------------------------------------
   describe "#max_total_vcpus" do
     it "returns 64 for a shared processor partition" do
       vm.advanced_settings.create!(:name => "processor_type", :value => "shared")
@@ -74,9 +68,6 @@ describe ManageIQ::Providers::IbmPowerHmc::InfraManager::Lpar do
     end
   end
 
-  # -----------------------------------------------------------------------
-  # reconfigure_vcpu_limits
-  # -----------------------------------------------------------------------
   describe "#reconfigure_vcpu_limits" do
     it "returns a hash with min 1 and max equal to max_total_vcpus" do
       vm.advanced_settings.create!(:name => "processor_type", :value => "shared")
@@ -84,28 +75,19 @@ describe ManageIQ::Providers::IbmPowerHmc::InfraManager::Lpar do
     end
   end
 
-  # -----------------------------------------------------------------------
-  # current_vcpu_count
-  # -----------------------------------------------------------------------
   describe "#current_vcpu_count" do
     it "returns cpu_total_cores as an integer" do
       expect(vm.current_vcpu_count).to eq(4)
     end
   end
 
-  # -----------------------------------------------------------------------
-  # max_cpu_cores_per_socket
-  # -----------------------------------------------------------------------
-  describe "#max_cpu_cores_per_socket" do
+ describe "#max_cpu_cores_per_socket" do
     it "always returns 1" do
       expect(vm.max_cpu_cores_per_socket).to eq(1)
       expect(vm.max_cpu_cores_per_socket(8)).to eq(1)
     end
   end
 
-  # -----------------------------------------------------------------------
-  # max_memory_mb
-  # -----------------------------------------------------------------------
   describe "#max_memory_mb" do
     it "returns host hardware memory when host is present" do
       expect(vm.max_memory_mb).to eq(65_536)
@@ -117,9 +99,6 @@ describe ManageIQ::Providers::IbmPowerHmc::InfraManager::Lpar do
     end
   end
 
-  # -----------------------------------------------------------------------
-  # supports? :reconfigure_vcpus
-  # -----------------------------------------------------------------------
   describe "supports? :reconfigure_vcpus" do
     it "is supported for shared processor partitions" do
       vm.advanced_settings.create!(:name => "processor_type", :value => "shared")
@@ -132,9 +111,6 @@ describe ManageIQ::Providers::IbmPowerHmc::InfraManager::Lpar do
     end
   end
 
-  # -----------------------------------------------------------------------
-  # build_config_spec
-  # -----------------------------------------------------------------------
   describe "#build_config_spec" do
     before do
       allow(ems).to receive(:with_provider_connection) { |&block| block.call(conn) }
@@ -285,9 +261,6 @@ describe ManageIQ::Providers::IbmPowerHmc::InfraManager::Lpar do
     end
   end
 
-  # -----------------------------------------------------------------------
-  # raw_reconfigure
-  # -----------------------------------------------------------------------
   describe "#raw_reconfigure" do
     before do
       allow(vm).to receive(:modify_attrs)
