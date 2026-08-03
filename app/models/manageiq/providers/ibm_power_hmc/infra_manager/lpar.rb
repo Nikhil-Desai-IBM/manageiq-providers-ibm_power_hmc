@@ -4,6 +4,7 @@ class ManageIQ::Providers::IbmPowerHmc::InfraManager::Lpar < ManageIQ::Providers
   end
 
   supports :reconfigure_network_adapters
+  supports :reconfigure_proc_units
 
   supports :reconfigure_vcpus do
     _("Virtual processors can only be reconfigured on shared processor partitions") if processor_share_type == "dedicated"

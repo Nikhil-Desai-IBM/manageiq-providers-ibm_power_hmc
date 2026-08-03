@@ -99,6 +99,12 @@ describe ManageIQ::Providers::IbmPowerHmc::InfraManager::Lpar do
     end
   end
 
+  describe "supports? :reconfigure_proc_units" do
+    it "is always supported" do
+      expect(vm.supports?(:reconfigure_proc_units)).to be true
+    end
+  end
+
   describe "supports? :reconfigure_vcpus" do
     it "is supported for shared processor partitions" do
       vm.advanced_settings.create!(:name => "processor_type", :value => "shared")
