@@ -167,7 +167,8 @@ describe ManageIQ::Providers::IbmPowerHmc::InfraManager::Refresher do
       :type            => "ManageIQ::Providers::IbmPowerHmc::InfraManager::Vios",
       :name            => "aramisios",
       :raw_power_state => "running",
-      :power_state     => "on"
+      :power_state     => "on",
+      :tools_status    => "active"
     )
     expect(vios.operating_system).to have_attributes(
       :product_name => "VIOS",
@@ -252,7 +253,8 @@ describe ManageIQ::Providers::IbmPowerHmc::InfraManager::Refresher do
       :type            => "ManageIQ::Providers::IbmPowerHmc::InfraManager::Lpar",
       :name            => "cooplab",
       :raw_power_state => "running",
-      :power_state     => "on"
+      :power_state     => "on",
+      :tools_status    => "active"
     )
     expect(lpar.operating_system).to have_attributes(
       :product_name => "AIX",
