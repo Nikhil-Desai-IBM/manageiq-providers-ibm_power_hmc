@@ -274,6 +274,7 @@ class ManageIQ::Providers::IbmPowerHmc::Inventory::Parser::InfraManager < Manage
       :vendor          => "ibm_power_hmc",
       :description     => lpar.description.to_s,
       :raw_power_state => lpar.state,
+      :tools_status    => lpar.rmc_state,
       :host            => host,
       :resource_pool   => resource_pool
     )
