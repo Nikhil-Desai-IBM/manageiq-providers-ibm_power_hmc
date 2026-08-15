@@ -112,17 +112,17 @@ describe ManageIQ::Providers::IbmPowerHmc::InfraManager::Refresher do
       :build_number => "SV860_FW860.61 (185)"
     )
     expect(host.hardware).to have_attributes(
-      :cpu_type        => "ppc64",
-      :bitness         => 64,
-      :model           => "828642A",
-      :cpu_speed       => 4_157,
-      :memory_mb       => 720_896,
-      :cpu_total_cores => 16,
-      :serial_number   => "103341V",
+      :cpu_type             => "ppc64",
+      :bitness              => 64,
+      :model                => "828642A",
+      :cpu_speed            => 4_157,
+      :memory_mb            => 720_896,
+      :cpu_total_cores      => 16,
+      :serial_number        => "103341V",
       :memory_mb_configured => 720_896,
       :memory_mb_available  => 636_928,
       :cpu_configured_cores => 16,
-      :cpu_available_cores  => 9.4,
+      :cpu_available_cores  => 9.4
     )
 
     io = host.hardware.physical_ports.find_by(:location => "U78C9.001.WZS00M8-P1-C15")
