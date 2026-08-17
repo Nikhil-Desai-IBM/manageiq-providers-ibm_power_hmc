@@ -15,7 +15,7 @@ class ManageIQ::Providers::IbmPowerHmc::InfraManager::EventTargetParser
     new_targets = []
 
     ems       = ems_event.ext_management_system
-    raw_event = ems_event.full_data
+    raw_event = ems_event.full_data.with_indifferent_access
 
     case ems_event.event_type
     when "MODIFY_URI", "ADD_URI", "DELETE_URI" # Damien: INVALID_URI?
@@ -69,7 +69,8 @@ class ManageIQ::Providers::IbmPowerHmc::InfraManager::EventTargetParser
     return [] unless usertask["status"].eql?("Completed")
 
     case usertask["key"]
-    when "TEMPLATE_PARTITION_SAVE", "TEMPLATE_PARTITION_SAVE_AS", "TEMPLATE_PARTITION_CAPTURE"
+    when "TEMPLATE_PARTITION_SAVE", "TEMPLATE_PARTITION_SAVE_AS", "TEMPLATE_PARTITION_CAPTURE",
+         "TEMPLATE_PARTITION_NEW", "TEMPLATE_SYSTEM_CAPTURE"
       handle_usertask_template_save(usertask)
     when "TEMPLATE_DELETE"
       handle_usertask_template_delete(usertask)
@@ -81,12 +82,18 @@ class ManageIQ::Providers::IbmPowerHmc::InfraManager::EventTargetParser
   end
 
   def handle_usertask_template_save(usertask)
-    [{:assoc => :miq_templates, :ems_ref => usertask['template_uuid']}]
+    template_uuid = usertask['template_uuid']
+    if template_uuid.nil?
+      $ibm_power_hmc_log.warn("#{self.class}##{__method__} usertask key=#{usertask["key"]} has no template_uuid (labelParams=#{usertask['labelParams'].inspect}), skipping targeted refresh")
+      return []
+    end
+    [{:assoc => :miq_templates, :ems_ref => template_uuid}]
   end
 
   def handle_usertask_template_delete(usertask)
     template = ManageIQ::Providers::InfraManager::Template.find_by(:ext_management_system => ems_event.ext_management_system, :name => usertask['labelParams'])
     if template.nil?
+      $ibm_power_hmc_log.warn("#{self.class}##{__method__} template not found in db for name=#{usertask['labelParams'].inspect}, skipping targeted refresh")
       []
     else
       [{:assoc => :miq_templates, :ems_ref => template.uid_ems}]
