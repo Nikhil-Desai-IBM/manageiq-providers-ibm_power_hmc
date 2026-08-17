@@ -68,9 +68,13 @@ class ManageIQ::Providers::IbmPowerHmc::Inventory::Parser::InfraManager < Manage
         :manufacturer         => "IBM",
         :model                => mtype_model,
         :memory_mb            => sys["InstalledSystemMemory"],
+        :memory_mb_configured => sys["ConfigurableSystemMemory"],
+        :memory_mb_available  => sys["CurrentAvailableSystemMemory"],
         :cpu_sockets          => sys["InstalledSystemProcessorUnits"],
         :cpu_total_cores      => sys["InstalledSystemProcessorUnits"],
         :cpu_cores_per_socket => 1,
+        :cpu_configured_cores => sys["ConfigurableSystemProcessorUnits"],
+        :cpu_available_cores  => sys["CurrentAvailableSystemProcessorUnits"],
         :serial_number        => serial
       )
     end
@@ -173,9 +177,13 @@ class ManageIQ::Providers::IbmPowerHmc::Inventory::Parser::InfraManager < Manage
       :model                => "#{sys.mtype}#{sys.model}",
       :cpu_speed            => collector.cec_cpu_freqs[sys.uuid],
       :memory_mb            => sys.memory,
+      :memory_mb_configured => sys.memory,
+      :memory_mb_available  => sys.avail_mem,
       :cpu_sockets          => sys.cpus,
       :cpu_total_cores      => sys.cpus,
       :cpu_cores_per_socket => 1,
+      :cpu_configured_cores => sys.cpus,
+      :cpu_available_cores  => sys.avail_cpus,
       :serial_number        => sys.serial
     )
     parse_host_guest_devices(hardware, sys)
