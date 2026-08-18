@@ -401,9 +401,11 @@ class ManageIQ::Providers::IbmPowerHmc::Inventory::Parser::InfraManager < Manage
   end
 
   def parse_vm_operating_system(vm, lpar)
+    os_name = lpar.respond_to?(:type) ? lpar.type : nil
+
     if lpar.os.nil? || lpar.os.downcase == "unknown"
       # RSCT is not running on the LPAR
-      if lpar.respond_to?(:type) && lpar.type == "Virtual IO Server"
+      if os_name == "Virtual IO Server"
         os_info = ["VIOS"]
       end
     else
@@ -424,12 +426,13 @@ class ManageIQ::Providers::IbmPowerHmc::Inventory::Parser::InfraManager < Manage
       end
     end
 
-    if os_info
+    if os_info || os_name
       persister.operating_systems.build(
         :vm_or_template => vm,
-        :product_name   => os_info[0],
-        :version        => os_info[1],
-        :build_number   => os_info[2]
+        :product_name   => os_info&.at(0),
+        :version        => os_info&.at(1),
+        :build_number   => os_info&.at(2),
+        :name           => os_name
       )
     end
   end
