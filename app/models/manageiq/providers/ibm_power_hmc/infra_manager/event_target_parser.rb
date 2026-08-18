@@ -83,21 +83,16 @@ class ManageIQ::Providers::IbmPowerHmc::InfraManager::EventTargetParser
 
   def handle_usertask_template_save(usertask)
     template_uuid = usertask['template_uuid']
-    if template_uuid.nil?
-      $ibm_power_hmc_log.warn("#{self.class}##{__method__} usertask key=#{usertask["key"]} has no template_uuid (labelParams=#{usertask['labelParams'].inspect}), skipping targeted refresh")
-      return []
-    end
+    return [] if template_uuid.nil?
+
     [{:assoc => :miq_templates, :ems_ref => template_uuid}]
   end
 
   def handle_usertask_template_delete(usertask)
     template = ManageIQ::Providers::InfraManager::Template.find_by(:ext_management_system => ems_event.ext_management_system, :name => usertask['labelParams'])
-    if template.nil?
-      $ibm_power_hmc_log.warn("#{self.class}##{__method__} template not found in db for name=#{usertask['labelParams'].inspect}, skipping targeted refresh")
-      []
-    else
-      [{:assoc => :miq_templates, :ems_ref => template.uid_ems}]
-    end
+    return [] if template.nil?
+
+    [{:assoc => :miq_templates, :ems_ref => template.uid_ems}]
   end
 
   def handle_usertask_pcm_preference(usertask)
