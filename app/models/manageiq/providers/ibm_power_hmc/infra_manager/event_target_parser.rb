@@ -15,7 +15,7 @@ class ManageIQ::Providers::IbmPowerHmc::InfraManager::EventTargetParser
     new_targets = []
 
     ems       = ems_event.ext_management_system
-    raw_event = ems_event.full_data.with_indifferent_access
+    raw_event = ems_event.full_data
 
     case ems_event.event_type
     when "MODIFY_URI", "ADD_URI", "DELETE_URI" # Damien: INVALID_URI?
@@ -66,9 +66,9 @@ class ManageIQ::Providers::IbmPowerHmc::InfraManager::EventTargetParser
   private
 
   def handle_usertask(usertask)
-    return [] unless usertask["status"].eql?("Completed")
+    return [] unless usertask[:status].eql?("Completed")
 
-    case usertask["key"]
+    case usertask[:key]
     when "TEMPLATE_PARTITION_SAVE", "TEMPLATE_PARTITION_SAVE_AS", "TEMPLATE_PARTITION_CAPTURE",
          "TEMPLATE_PARTITION_NEW", "TEMPLATE_SYSTEM_CAPTURE"
       handle_usertask_template_save(usertask)
@@ -82,21 +82,21 @@ class ManageIQ::Providers::IbmPowerHmc::InfraManager::EventTargetParser
   end
 
   def handle_usertask_template_save(usertask)
-    template_uuid = usertask['template_uuid']
+    template_uuid = usertask[:template_uuid]
     return [] if template_uuid.nil?
 
     [{:assoc => :miq_templates, :ems_ref => template_uuid}]
   end
 
   def handle_usertask_template_delete(usertask)
-    template = ManageIQ::Providers::InfraManager::Template.find_by(:ext_management_system => ems_event.ext_management_system, :name => usertask['labelParams'])
+    template = ManageIQ::Providers::InfraManager::Template.find_by(:ext_management_system => ems_event.ext_management_system, :name => usertask[:labelParams])
     return [] if template.nil?
 
     [{:assoc => :miq_templates, :ems_ref => template.uid_ems}]
   end
 
   def handle_usertask_pcm_preference(usertask)
-    hostnames     = usertask['labelParams'].first.tr("[] ", "").split(",")
+    hostnames     = usertask[:labelParams].first.tr("[] ", "").split(",")
     host_ems_refs = ManageIQ::Providers::IbmPowerHmc::InfraManager::Host.where(:ext_management_system => ems_event.ext_management_system, :name => hostnames).pluck(:ems_ref)
     host_ems_refs.map { |ems_ref| {:assoc => :hosts, :ems_ref => ems_ref} }
   end

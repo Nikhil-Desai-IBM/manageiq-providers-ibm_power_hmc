@@ -7,7 +7,7 @@ module ManageIQ::Providers::IbmPowerHmc::InfraManager::EventParser
       :timestamp  => event.published,
       :message    => event.detail,
       # Serialize IbmPowerHmc::Event
-      :full_data  => {:data => event.data, :detail => event.detail, :usertask => event.usertask},
+      :full_data  => {:data => event.data, :detail => event.detail, :usertask => event.usertask}.deep_symbolize_keys,
       :ems_id     => ems_id
     }
 

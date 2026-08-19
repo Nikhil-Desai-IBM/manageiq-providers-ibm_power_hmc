@@ -83,6 +83,7 @@ describe ManageIQ::Providers::IbmPowerHmc::InfraManager::EventTargetParser do
         }
       )
     end
+
     it "Template new (created from scratch in HMC)" do
       assert_event_triggers_target(
         "test_data/template.xml",
@@ -101,6 +102,7 @@ describe ManageIQ::Providers::IbmPowerHmc::InfraManager::EventTargetParser do
         }
       )
     end
+
     it "Template new with missing template_uuid returns no targets" do
       ems_event      = create_ems_event(
         "test_data/template.xml",
