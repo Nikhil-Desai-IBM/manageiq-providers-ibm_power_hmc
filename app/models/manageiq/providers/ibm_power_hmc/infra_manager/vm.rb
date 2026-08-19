@@ -44,10 +44,6 @@ class ManageIQ::Providers::IbmPowerHmc::InfraManager::Vm < ManageIQ::Providers::
     raise StandardError, "Must be implemented in a subclass"
   end
 
-  def cpu_field_label
-    _('Virtual Processors')
-  end
-
   def raw_start
     poweron
   end
