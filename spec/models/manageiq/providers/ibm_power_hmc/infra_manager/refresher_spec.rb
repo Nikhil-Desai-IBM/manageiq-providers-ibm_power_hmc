@@ -176,7 +176,8 @@ describe ManageIQ::Providers::IbmPowerHmc::InfraManager::Refresher do
     )
     expect(vios.operating_system).to have_attributes(
       :product_name => "VIOS",
-      :version      => "3.1.0.11"
+      :version      => "3.1.0.11",
+      :name         => "Virtual IO Server"
     )
     expect(vios.hardware).to have_attributes(
       :cpu_type        => "ppc64",
@@ -263,7 +264,8 @@ describe ManageIQ::Providers::IbmPowerHmc::InfraManager::Refresher do
     expect(lpar.operating_system).to have_attributes(
       :product_name => "AIX",
       :version      => "7.3",
-      :build_number => "7300-00-00-0000"
+      :build_number => "7300-00-00-0000",
+      :name         => "AIX/Linux"
     )
     expect(lpar.hardware).to have_attributes(
       :cpu_type        => "ppc64",
