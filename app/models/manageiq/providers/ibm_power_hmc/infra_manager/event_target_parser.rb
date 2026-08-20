@@ -101,4 +101,3 @@ class ManageIQ::Providers::IbmPowerHmc::InfraManager::EventTargetParser
     host_ems_refs.map { |ems_ref| {:assoc => :hosts, :ems_ref => ems_ref} }
   end
 end
-
