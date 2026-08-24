@@ -250,6 +250,6 @@ describe ManageIQ::Providers::IbmPowerHmc::InfraManager::EventTargetParser do
     event = IbmPowerHmc::FeedParser.new(File.read(File.join(File.dirname(__FILE__), filename))).objects(:Event).first
     event.usertask = usertask
     event_hash = ManageIQ::Providers::IbmPowerHmc::InfraManager::EventParser.event_to_hash(event, @ems.id)
-    EmsEvent.add(@ems.id, event_hash)
+    EmsEvent.add(@ems.id, event_hash.deep_symbolize_keys)
   end
 end
