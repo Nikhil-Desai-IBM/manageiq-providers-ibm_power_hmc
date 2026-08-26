@@ -177,12 +177,12 @@ class ManageIQ::Providers::IbmPowerHmc::Inventory::Parser::InfraManager < Manage
       :model                => "#{sys.mtype}#{sys.model}",
       :cpu_speed            => collector.cec_cpu_freqs[sys.uuid],
       :memory_mb            => sys.memory,
-      :memory_mb_configured => sys.memory,
+      :memory_mb_configured => sys.config_mem,
       :memory_mb_available  => sys.avail_mem,
       :cpu_sockets          => sys.cpus,
       :cpu_total_cores      => sys.cpus,
       :cpu_cores_per_socket => 1,
-      :cpu_configured_cores => sys.cpus,
+      :cpu_configured_cores => sys.config_cpus,
       :cpu_available_cores  => sys.avail_cpus,
       :serial_number        => sys.serial
     )
