@@ -14,6 +14,21 @@ module ManageIQ::Providers::IbmPowerHmc::InfraManager::Vm::Reconfigure
     max_total_vcpus
   end
 
+  # Returns the allowed vcpu range for this partition.
+  # Consumed by the UI controller when supports?(:reconfigure_vcpus) is true.
+  def reconfigure_vcpu_limits
+    {
+      :min => 1,
+      :max => max_total_vcpus
+    }
+  end
+
+  # Returns the current virtual processor count to pre-populate the reconfigure form.
+  # For shared partitions, cpu_total_cores stores the virtual processor count (vprocs).
+  def current_vcpu_count
+    cpu_total_cores.to_i
+  end
+
   def max_cpu_cores_per_socket(_total_vcpus = nil)
     1
   end
@@ -37,6 +52,7 @@ module ManageIQ::Providers::IbmPowerHmc::InfraManager::Vm::Reconfigure
     spec = {}
     build_memory_config_spec(lpar, spec, options) if options.key?(:vm_memory)
     build_proc_config_spec(lpar, spec, options) if options.key?(:number_of_cpus)
+    build_vproc_config_spec(lpar, spec, options) if options.key?(:number_of_vcpus)
     build_netadap_create_config_spec(spec, options) if options.key?(:network_adapter_add)
     build_netadap_delete_config_spec(spec, options) if options.key?(:network_adapter_remove)
 
@@ -62,19 +78,37 @@ module ManageIQ::Providers::IbmPowerHmc::InfraManager::Vm::Reconfigure
 
   def build_proc_config_spec(lpar, spec, options)
     if lpar.dedicated == "true"
-      min, max = lpar.minimum_procs, lpar.maximum_procs
-      attr = :desired_procs
+      min     = lpar.minimum_procs.to_i
+      max     = lpar.maximum_procs.to_i
+      desired = options[:number_of_cpus].to_i
+      raise MiqException::MiqVmError, "Processor count cannot be lower than #{min}"   if desired < min
+      raise MiqException::MiqVmError, "Processor count cannot be greater than #{max}" if desired > max
+
+      spec[:desired_procs] = desired
     else
-      min, max = lpar.minimum_vprocs, lpar.maximum_vprocs
-      attr = :desired_vprocs
+      min     = lpar.minimum_proc_units.to_f
+      max     = lpar.maximum_proc_units.to_f
+      desired = options[:number_of_cpus].to_f
+      raise MiqException::MiqVmError, "Processing units cannot be lower than #{min}"   if desired < min
+      raise MiqException::MiqVmError, "Processing units cannot be greater than #{max}" if desired > max
+
+      spec[:desired_proc_units] = desired
     end
+  end
 
-    desired_procs = options[:number_of_cpus].to_i
+  # Builds the virtual processor reconfigure spec for shared partitions.
+  # Uses :number_of_vcpus separately from :number_of_cpus, which is handled by
+  # build_proc_config_spec for processor count or processing units.
+  def build_vproc_config_spec(lpar, spec, options)
+    raise MiqException::MiqVmError, "Virtual processors can only be changed on shared processor partitions" if lpar.dedicated == "true"
 
-    raise MiqException::MiqVmError, "Processor count cannot be lower than #{min}"   if desired_procs < min.to_i
-    raise MiqException::MiqVmError, "Processor count cannot be greater than #{max}" if desired_procs > max.to_i
+    desired_vprocs = options[:number_of_vcpus].to_i
+    min, max = lpar.minimum_vprocs, lpar.maximum_vprocs
 
-    spec[attr] = desired_procs
+    raise MiqException::MiqVmError, "Virtual processors cannot be lower than #{min}"   if desired_vprocs < min.to_i
+    raise MiqException::MiqVmError, "Virtual processors cannot be greater than #{max}" if desired_vprocs > max.to_i
+
+    spec[:desired_vprocs] = desired_vprocs
   end
 
   def build_netadap_create_config_spec(spec, options)
@@ -105,7 +139,7 @@ module ManageIQ::Providers::IbmPowerHmc::InfraManager::Vm::Reconfigure
     $ibm_power_hmc_log.debug("reconfiguring with spec=#{spec}")
 
     ext_management_system.with_provider_connection do |connection|
-      attrs = spec.slice(:desired_memory, :desired_procs, :desired_vprocs)
+      attrs = spec.slice(:desired_memory, :desired_procs, :desired_proc_units, :desired_vprocs)
       modify_attrs(connection, attrs) unless attrs.empty?
 
       spec[:netadap_delete].try(:each) do |uuid|
