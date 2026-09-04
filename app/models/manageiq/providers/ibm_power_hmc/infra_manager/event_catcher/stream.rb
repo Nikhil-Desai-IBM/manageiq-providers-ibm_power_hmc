@@ -16,14 +16,12 @@ class ManageIQ::Providers::IbmPowerHmc::InfraManager::EventCatcher::Stream
 
   def poll(&block)
     @ems.with_provider_connection do |connection|
-      # The HMC waits 10 seconds by default before returning if there is no event.
       until @stop_polling
-        connection.next_events(false).select do |event|
+        events = connection.next_events(false).select do |event|
           event.type.in?(["ADD_URI", "MODIFY_URI", "DELETE_URI"])
-        end.each do |event|
-          block.call(event)
         end
-        sleep(@options[:poll_sleep])
+        events.each(&block)
+        sleep(@options[:poll_sleep]) if events.empty?
       end
     rescue IbmPowerHmc::Connection::HttpError => e
       $ibm_power_hmc_log.error("querying hmc events failed: #{e}")
