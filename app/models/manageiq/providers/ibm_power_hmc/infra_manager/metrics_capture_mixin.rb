@@ -17,19 +17,25 @@ module ManageIQ::Providers::IbmPowerHmc::InfraManager::MetricsCaptureMixin
   end
 
   def disk_usage_rate_average(sample)
+    $ibm_power_hmc_log.debug("#{self.class}##{__method__} sample=#{sample.inspect}")
     usage = sample.values.sum do |adapters|
       adapters.sum do |adapter|
         adapter["readBytes"].sum + adapter["writeBytes"].sum
       end
     end
-    usage / SAMPLE_DURATION / 1.0.kilobyte
+    result = usage / SAMPLE_DURATION / 1.0.kilobyte
+    $ibm_power_hmc_log.debug("#{self.class}##{__method__} usage=#{usage} result=#{result}")
+    result
   end
 
   def disk_usage_rate_average_vios(sample)
+    $ibm_power_hmc_log.debug("#{self.class}##{__method__} sample=#{sample.inspect}")
     usage = sample.values.sum do |adapters|
       adapters.select { |a| a.kind_of?(Hash) }.sum { |adapter| adapter["transmittedBytes"]&.sum || 0.0 }
     end
-    usage / SAMPLE_DURATION / 1.0.kilobyte
+    result = usage / SAMPLE_DURATION / 1.0.kilobyte
+    $ibm_power_hmc_log.debug("#{self.class}##{__method__} usage=#{usage} result=#{result}")
+    result
   end
 
   def disk_usage_rate_average_all_vios(sample)
@@ -49,12 +55,17 @@ module ManageIQ::Providers::IbmPowerHmc::InfraManager::MetricsCaptureMixin
   end
 
   def net_usage_rate_average(sample)
+    $ibm_power_hmc_log.debug("#{self.class}##{__method__} sample=#{sample.inspect}")
     usage = sample.values.sum do |adapters|
       adapters.select { |a| a.kind_of?(Hash) }.sum do |adapter|
-        adapter["transferredBytes"].sum
+        bytes = adapter["transferredBytes"]&.sum || 0.0
+        $ibm_power_hmc_log.debug("#{self.class}##{__method__} adapter=#{adapter.keys.inspect} transferredBytes=#{bytes}")
+        bytes
       end
     end
-    usage / SAMPLE_DURATION / 1.0.kilobyte
+    result = usage / SAMPLE_DURATION / 1.0.kilobyte
+    $ibm_power_hmc_log.debug("#{self.class}##{__method__} usage=#{usage} result=#{result}")
+    result
   end
 
   def net_usage_rate_average_server(sample)
@@ -79,9 +90,12 @@ module ManageIQ::Providers::IbmPowerHmc::InfraManager::MetricsCaptureMixin
   end
 
   def safe_rate(numerator, denominator)
-    unless denominator.to_i == 0
-      100.0 * numerator / denominator
-    end
+    $ibm_power_hmc_log.debug("#{self.class}##{__method__} numerator=#{numerator} denominator=#{denominator}")
+    result = unless denominator.zero?
+               100.0 * numerator / denominator
+             end
+    $ibm_power_hmc_log.debug("#{self.class}##{__method__} result=#{result.inspect}")
+    result
   end
 
   def interpolate_samples(processed)
