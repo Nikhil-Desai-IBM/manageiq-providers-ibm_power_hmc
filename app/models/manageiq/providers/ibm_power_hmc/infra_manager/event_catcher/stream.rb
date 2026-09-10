@@ -16,7 +16,7 @@ class ManageIQ::Providers::IbmPowerHmc::InfraManager::EventCatcher::Stream
 
   def poll(&block)
     @ems.with_provider_connection do |connection|
-      # The HMC waits 10 seconds before returning 204 if there is no event.
+      # HMC waits 10 seconds before returning 204 if there is no event.
       until @stop_polling
         events = connection.next_events(false).select do |event|
           event.type.in?(["ADD_URI", "MODIFY_URI", "DELETE_URI"])
